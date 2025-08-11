@@ -13,48 +13,30 @@ import java.util.stream.Collectors;
 @Service
 public class FacultyService {
 
-    private long countFaculty = 0;
-    private final Map<Long, Faculty> faculties;
     private final FacultyRepository facultyRepository;
 
-    public FacultyService(long countFaculty, Map<Long, Faculty> faculties, FacultyRepository facultyRepository) {
+    public FacultyService(FacultyRepository facultyRepository) {
         this.facultyRepository = facultyRepository;
-        this.countFaculty++;
-        this.faculties = new HashMap<>();
-    }
-
-    public long getCountFaculty() {
-        return countFaculty;
-    }
-
-    public Map<Long, Faculty> getFaculty() {
-        return faculties;
     }
 
     public Faculty createFaculty(Faculty faculty) {
-        countFaculty++;
-        faculties.put(faculty.getId(), faculty);
-        return faculty;
+        return facultyRepository.save(faculty);
     }
 
     public Faculty getFacultyId(Long id) {
-        return faculties.get(id);
+        return facultyRepository.findById(id).get();
     }
 
     public Faculty updateFaculty(Faculty faculty) {
-        if (!faculties.containsKey(faculty.getId())) {
-            return null;
-        }
-        faculties.put(faculty.getId(), faculty);
-        return faculty;
+        return facultyRepository.save(faculty);
     }
 
-    public Faculty deleteFaculty(Long id) {
-        return faculties.remove(id);
+    public void deleteFaculty(Long id) {
+        facultyRepository.deleteById(id);
     }
 
     public Collection<Faculty> filterColor(String color) {
-        return faculties.values().stream()
+        return facultyRepository.findAll().stream()
                 .filter(faculty -> Objects.equals(faculty.getColor(), color))
                 .collect(Collectors.toList());
     }
