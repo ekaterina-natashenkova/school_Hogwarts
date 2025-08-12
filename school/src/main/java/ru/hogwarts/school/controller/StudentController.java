@@ -17,6 +17,11 @@ import ru.hogwarts.school.service.StudentService;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * ResponseEntity.notFound().build() - когда ресурс не был найден, поскольку это соответствует коду состояния HTTP 404 Not Found.
+ * ResponseEntity.status(HttpStatus.BAD_REQUEST).build() - когда запрос от клиента был неверным или не соответствует требованиям сервера.
+ */
+
 @RestController
 @RequestMapping("/student")
 public class StudentController {
@@ -36,7 +41,7 @@ public class StudentController {
     public ResponseEntity<Student> getStudentId(@PathVariable Long id) {
         Student student = studentService.getStudentId(id);
         if (student == null) {
-            return ResponseEntity.notFound().build(); // ?? или тут лучше использовать ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(student);
     }
@@ -45,7 +50,7 @@ public class StudentController {
     public ResponseEntity<Student> updateStudent(@RequestBody Student student) {
         Student student2 = studentService.updateStudent(student);
         if (student2 == null) {
-            return ResponseEntity.notFound().build(); // ?? или тут лучше использовать ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(student2);
     }

@@ -1,20 +1,30 @@
 package ru.hogwarts.school.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import org.springframework.data.annotation.Id;
 
 import java.util.Objects;
 
 @Entity
+@Table(name = "Faculty")
 public class Faculty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(name = "faculty_name")
     private String name;
+
+    @Column(name = "faculty_name")
     private String color;
+
+    public Faculty() {
+    }
 
     public Faculty(Long id, String name, String color) {
         this.id = id;
