@@ -45,18 +45,7 @@ public class FacultyService {
     }
 
     public Collection<Faculty> findByNameOrColor(String findParameter) {
-        Collection<Faculty> findResult = new ArrayList<>();
-        findResult.addAll(findByNameIgnoreCase(findParameter));
-        findResult.addAll(findByColorIgnoreCase(findParameter));
-        return findResult;
-    }
-
-    public Collection<Faculty> findByNameIgnoreCase(String name) {
-        return facultyRepository.findByNameIgnoreCase(name);
-    }
-
-    public Collection<Faculty> findByColorIgnoreCase(String color) {
-        return facultyRepository.findByColorIgnoreCase(color);
+        return facultyRepository.findByNameOrColorIgnoreCase(findParameter, findParameter);
     }
 
     public Collection<Student> getStudentsByFaculty(Long id) {

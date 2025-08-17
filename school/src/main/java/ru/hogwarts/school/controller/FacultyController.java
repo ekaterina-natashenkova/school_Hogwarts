@@ -72,8 +72,10 @@ public class FacultyController {
         return ResponseEntity.ok(Collections.emptyList());
     }
 
-    public ResponseEntity<Collection<Faculty>> findByNameOrColor(String findParameter) {
-        return ResponseEntity.ok(facultyService.findByNameOrColor(findParameter));
+    @GetMapping("/nameOrColor")
+    public ResponseEntity<Collection<Faculty>> findByNameOrColor(@RequestParam String findParameter) {
+        Collection<Faculty> faculties = facultyService.findByNameOrColor(findParameter);
+        return ResponseEntity.ok(faculties);
     }
 
     @GetMapping("/getStudentsFaculty/{id}")
