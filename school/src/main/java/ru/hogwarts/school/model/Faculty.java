@@ -1,12 +1,13 @@
 package ru.hogwarts.school.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -15,14 +16,15 @@ import java.util.Objects;
 @Table(name = "Faculty")
 public class Faculty {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "faculty_name")
     private String name;
 
-    @Column(name = "faculty_name")
+    @Column(name = "faculty_color")
     private String color;
 
     @OneToMany(mappedBy = "faculty")
