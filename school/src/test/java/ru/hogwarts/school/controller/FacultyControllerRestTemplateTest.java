@@ -95,7 +95,7 @@ class FacultyControllerRestTemplateTest {
         Faculty expected = getTestFaculty("TestFaculty", "Color");
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/add"),
+                getURL("/faculty"),
                 HttpMethod.POST,
                 new HttpEntity<Faculty>(expected),
                 new ParameterizedTypeReference<Faculty>() {
@@ -115,7 +115,7 @@ class FacultyControllerRestTemplateTest {
         Faculty expected = getOneSomeFaculty(repository);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/get/{id}") + expected.getId(),
+                getURL("/faculty/{id}") + expected.getId(),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
@@ -139,7 +139,7 @@ class FacultyControllerRestTemplateTest {
 
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/edit"),
+                getURL("/faculty"),
                 HttpMethod.PUT,
                 new HttpEntity<Faculty>(expected),
                 new ParameterizedTypeReference<Faculty>() {
@@ -160,7 +160,7 @@ class FacultyControllerRestTemplateTest {
         Faculty expected = getOneSomeFaculty(repository);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/delete/{id}") + expected.getId(),
+                getURL("/faculty{id}") + expected.getId(),
                 HttpMethod.DELETE,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
@@ -185,7 +185,7 @@ class FacultyControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Faculty>> result = restTemplate.exchange(
-                getURL("/filterColor" + color),
+                getURL("/faculty/filterColor" + color),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Faculty>>() {
@@ -215,7 +215,7 @@ class FacultyControllerRestTemplateTest {
         expected.add(expected1);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/nameOrColor" + "&name=" + name.toUpperCase() + "&color=" + color.toUpperCase()),
+                getURL("/faculty/nameOrColor" + "&name=" + name.toUpperCase() + "&color=" + color.toUpperCase()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
@@ -244,7 +244,7 @@ class FacultyControllerRestTemplateTest {
         facultyRepository.save(testFaculty);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/getStudentsFaculty/{id}" + testFaculty.getId()),
+                getURL("/faculty/getStudentsFaculty/{id}" + testFaculty.getId()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {

@@ -99,7 +99,7 @@ class StudentControllerRestTemplateTest {
         Student expected = getTestStudent("TestStudent", 20);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/add"),
+                getURL("/student"),
                 HttpMethod.POST,
                 new HttpEntity<Student>(expected),
                 new ParameterizedTypeReference<Student>() {
@@ -119,7 +119,7 @@ class StudentControllerRestTemplateTest {
         Student expected = getOneSomeStudents(repository);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/get/{id}") + expected.getId(),
+                getURL("/student/{id}") + expected.getId(),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Student>() {
@@ -142,7 +142,7 @@ class StudentControllerRestTemplateTest {
         expected.setAge(200);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/edit"),
+                getURL("/student"),
                 HttpMethod.PUT,
                 new HttpEntity<Student>(expected),
                 new ParameterizedTypeReference<Student>() {
@@ -163,7 +163,7 @@ class StudentControllerRestTemplateTest {
         Student expected = getOneSomeStudents(repository);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/delete/{id}") + expected.getId(),
+                getURL("/student/{id}") + expected.getId(),
                 HttpMethod.DELETE,
                 null,
                 new ParameterizedTypeReference<Student>() {
@@ -188,7 +188,7 @@ class StudentControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/filterAge" + age),
+                getURL("/student/filterAge" + age),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -217,7 +217,7 @@ class StudentControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/ageBetween" + "&min=" + (age - 1) + "&max=" + (age + 5)),
+                getURL("/student/ageBetween" + "&min=" + (age - 1) + "&max=" + (age + 5)),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -246,7 +246,7 @@ class StudentControllerRestTemplateTest {
         facultyRepository.save(testFaculty);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/getFaculty/{id}" + test1.getId()),
+                getURL("/student/getFacultyStudent/{id}" + test1.getId()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
