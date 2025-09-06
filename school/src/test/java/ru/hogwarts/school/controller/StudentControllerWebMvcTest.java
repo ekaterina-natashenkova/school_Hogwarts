@@ -148,11 +148,11 @@ class StudentControllerWebMvcTest {
     @Test
     @DisplayName("Фильтрация студентов по возрасту")
     void filterAgeStudent() throws Exception {
+        int ageFilter = 23;
         long id = 15L;
         String name = "TestStudent";
         int age = 23;
         Student testStudent = getTestStudent(id, name, age);
-        int ageFilter = 21;
 
         Collection<Student> studentsByAge = Collections.singletonList(testStudent);
 
@@ -162,7 +162,7 @@ class StudentControllerWebMvcTest {
                         .get("/student/filterAge", ageFilter)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$[0].name").value(name))
                 .andExpect(jsonPath("$[0].age").value(age));
     }
@@ -193,22 +193,22 @@ class StudentControllerWebMvcTest {
     }
 
     @Test
-    @DisplayName("Поиск студентов по возрасту в заданном диапазоне")
+    @DisplayName("Вывод факультета заданного студента")
     void getFacultyByStudent() throws Exception {
+        long studentId = 5L;
         long id = 5L;
         String name = "Lion";
         String color = "orange";
         Faculty testFaculty = getTestFaculty(id, name, color);
-        long studentId = 1L;
 
         when(studentService.getFacultyByStudent(studentId)).thenReturn((Collection<Student>) testFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/get_faculty/{id}", studentId)
+                        .get("/student/getFacultyStudent/{id}", studentId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(id))
-                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.name").value(name))
                 .andExpect(jsonPath("$.color").value(color));
     }
 
