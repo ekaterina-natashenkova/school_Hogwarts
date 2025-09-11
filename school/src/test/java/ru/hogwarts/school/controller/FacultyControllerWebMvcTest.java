@@ -96,7 +96,7 @@ class FacultyControllerWebMvcTest {
         when(facultyService.getFacultyId(anyLong())).thenReturn(testFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/{id}", testFaculty.getId())
+                        .get("/faculty/" + testFaculty.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testFaculty.getId()))
@@ -188,7 +188,7 @@ class FacultyControllerWebMvcTest {
                         .param("find", findName)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(11L))
+                .andExpect(jsonPath("$[0].id").value(testFaculty1.getId()))
                 .andExpect(jsonPath("$[0].name").value("TestFaculty1"))
                 .andExpect(jsonPath("$[0].color").value("RandomColor1"));
 
