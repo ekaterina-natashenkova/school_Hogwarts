@@ -103,9 +103,6 @@ class FacultyControllerRestTemplateTest {
         assertThat(actual).isNotNull();
         assertThat(actual.getId()).isNotNull();
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected);
-        //assertEquals(expected.getName(), actual.getName());
-        //assertEquals(expected.getColor(), actual.getColor());
-
     }
 
     @Test
