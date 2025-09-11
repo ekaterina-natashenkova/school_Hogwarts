@@ -16,7 +16,7 @@ import java.util.Objects;
 @Table(name = "Faculty")
 public class Faculty {
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

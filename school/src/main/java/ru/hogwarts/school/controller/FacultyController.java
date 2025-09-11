@@ -34,9 +34,11 @@ public class FacultyController {
         this.facultyService = facultyService;
     }
 
-    @PostMapping()
+    @PostMapping("/add")
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
+        System.out.println("faculty = " + faculty);
         Faculty faculty1 = facultyService.createFaculty(faculty);
+        System.out.println("faculty1 = " + faculty1);
         return ResponseEntity.ok(faculty1);
     }
 
@@ -46,6 +48,7 @@ public class FacultyController {
         if (faculty == null) {
             return ResponseEntity.notFound().build();
         }
+        //System.out.println("faculty = " + faculty);
         return ResponseEntity.ok(faculty);
     }
 

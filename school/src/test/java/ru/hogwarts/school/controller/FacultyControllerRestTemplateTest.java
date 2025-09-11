@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.RandomUtils.insecure;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,34 +53,32 @@ class FacultyControllerRestTemplateTest {
     /**
      * Метод для динамического формирования полного URL адреса к эндпоинтам
      */
-    String getURL(String url) {
+    private String getURL(String url) {
         return "http://localhost:" + port + "/faculty" + url;
     }
 
     /**
      * Метод для формирования списка факультетов
      */
-    List<Faculty> getFacultyRepository() {
+    private List<Faculty> addAndGetFacultyList() {
         return Stream.generate(() -> facultyRepository.save(new Faculty()))
                 .limit(nextInt(1, 5))
                 .toList();
     }
 
-    Faculty getOneSomeFaculty(List<Faculty> repository) {
+    private Faculty getOneSomeFaculty(List<Faculty> repository) {
         return repository.get(new Random().nextInt(repository.size()));
     }
 
-    Faculty getTestFaculty(String name, String color) {
+    private Faculty getTestFaculty(String name, String color) {
         Faculty test = new Faculty();
-        test.setId(0L);
         test.setName(name);
         test.setColor(color);
         return test;
     }
 
-    Student getTestStudentWithFaculty(String name, int age, Faculty faculty) {
+    private Student getTestStudentWithFaculty(String name, int age, Faculty faculty) {
         Student test = new Student();
-        test.setId(0L);
         test.setName(name);
         test.setAge(age);
         test.setFaculty(faculty);
@@ -91,46 +88,45 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Добавление факультета")
     void createFaculty() {
-        List<Faculty> repository = getFacultyRepository();
         Faculty expected = getTestFaculty("TestFaculty", "Color");
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/faculty"),
+                getURL("/add"),
                 HttpMethod.POST,
                 new HttpEntity<Faculty>(expected),
                 new ParameterizedTypeReference<Faculty>() {
                 }
         );
-        expected.setId(result.getBody().getId());
 
         assertThat(result).isNotNull();
-        assertThat(result.getBody()).isNotNull();
-        assertEquals(expected, result.getBody());
+        final Faculty actual = result.getBody();
+        assertThat(actual).isNotNull();
+        assertThat(actual.getId()).isNotNull();
+        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected);
+        //assertEquals(expected.getName(), actual.getName());
+        //assertEquals(expected.getColor(), actual.getColor());
+
     }
 
     @Test
     @DisplayName("Просмотр добавленного факультета по id")
     void getFacultyId() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         Faculty expected = getOneSomeFaculty(repository);
-
-        ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/faculty/{id}") + expected.getId(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Faculty>() {
-                }
-        );
+        String url = getURL("/") + expected.getId();
+        //System.out.println(url);
+        ResponseEntity<Faculty> result = restTemplate.getForEntity(url, Faculty.class);
 
         assertThat(result).isNotNull();
         assertThat(result.getBody()).isNotNull();
+        //System.out.println(expected);
         assertEquals(expected, result.getBody());
     }
 
     @Test
     @DisplayName("Обновление данных факультета")
     void updateFaculty() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         Faculty actual = getOneSomeFaculty(repository);
         Faculty expected = new Faculty();
         expected.setId(actual.getId());
@@ -139,7 +135,7 @@ class FacultyControllerRestTemplateTest {
 
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/faculty"),
+                getURL("/"),
                 HttpMethod.PUT,
                 new HttpEntity<Faculty>(expected),
                 new ParameterizedTypeReference<Faculty>() {
@@ -156,11 +152,11 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Удаление добавленного факультета по id")
     void deleteFaculty() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         Faculty expected = getOneSomeFaculty(repository);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/faculty{id}") + expected.getId(),
+                getURL("/") + expected.getId(),
                 HttpMethod.DELETE,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
@@ -174,7 +170,7 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Фильтрация факультетов по цвету")
     void filterColorFaculty() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         String color = "red";
         Faculty test1 = getTestFaculty("TestFaculty1", color);
         Faculty test2 = getTestFaculty("TestFaculty2", color);
@@ -185,7 +181,7 @@ class FacultyControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Faculty>> result = restTemplate.exchange(
-                getURL("/faculty/filterColor" + color),
+                getURL("/filterColor" + color),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Faculty>>() {
@@ -203,7 +199,7 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Поиск факультетов по названию или цвету")
     void findByNameOrColor() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         String name = "Lion";
         String color = "orange";
         Faculty expected1 = getTestFaculty(name, "color");
@@ -215,7 +211,7 @@ class FacultyControllerRestTemplateTest {
         expected.add(expected1);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/faculty/nameOrColor" + "&name=" + name.toUpperCase() + "&color=" + color.toUpperCase()),
+                getURL("/nameOrColor" + "&name=" + name.toUpperCase() + "&color=" + color.toUpperCase()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Faculty>() {
@@ -231,7 +227,7 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Получение списка студентов заданного факультета")
     void getStudentsByFaculty() {
-        List<Faculty> repository = getFacultyRepository();
+        List<Faculty> repository = addAndGetFacultyList();
         Faculty testFaculty = getOneSomeFaculty(repository);
         Student test1 = getTestStudentWithFaculty("Dag", 22, testFaculty);
         Student test2 = getTestStudentWithFaculty("Bony", 24, testFaculty);
@@ -244,7 +240,7 @@ class FacultyControllerRestTemplateTest {
         facultyRepository.save(testFaculty);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/faculty/getStudentsFaculty/{id}" + testFaculty.getId()),
+                getURL("/getStudentsFaculty/" + testFaculty.getId()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
