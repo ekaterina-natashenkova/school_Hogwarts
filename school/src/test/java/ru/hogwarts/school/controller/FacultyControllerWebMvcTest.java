@@ -3,11 +3,13 @@ package ru.hogwarts.school.controller;
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -17,17 +19,22 @@ import ru.hogwarts.school.service.StudentService;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentCaptor.forClass;
 
-@WebMvcTest(StudentController.class)
+@WebMvcTest(FacultyController.class)
 class FacultyControllerWebMvcTest {
 
     @Autowired
@@ -65,13 +72,11 @@ class FacultyControllerWebMvcTest {
     @Test
     @DisplayName("Добавление факультета")
     void createFaculty() throws Exception {
-        String name = "TestFaculty";
-        String color = "RandomColor";
-        Faculty testFaculty = getTestFaculty(name, color);
+        Faculty testFaculty = getTestFaculty("TestFaculty", "RandomColor");
 
         JSONObject facultyObject = new JSONObject();
-        facultyObject.put("name", name);
-        facultyObject.put("color", color);
+        facultyObject.put("name", testFaculty.getName());
+        facultyObject.put("color", testFaculty.getColor());
 
         when(facultyService.createFaculty(any(Faculty.class))).thenReturn(testFaculty);
 
@@ -81,22 +86,18 @@ class FacultyControllerWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.color").value(color));
+                .andExpect(jsonPath("$.name").value(testFaculty.getName()))
+                .andExpect(jsonPath("$.color").value(testFaculty.getColor()));
     }
 
     @Test
     @DisplayName("Просмотр добавленного факультета по id")
     void getFacultyId() throws Exception {
-        long id = 10L;
-        String name = "TestFaculty";
-        String color = "RandomColor";
-        Faculty testFaculty = getTestFaculty(id, name, color);
+        Faculty testFaculty = getTestFaculty(10L, "TestFaculty", "RandomColor");
 
         when(facultyService.getFacultyId(anyLong())).thenReturn(testFaculty);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/" + testFaculty.getId())
+        mockMvc.perform(get("/faculty/" + testFaculty.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testFaculty.getId()))
@@ -107,35 +108,29 @@ class FacultyControllerWebMvcTest {
     @Test
     @DisplayName("Обновление данных факультета")
     void updateFaculty() throws Exception {
-        long id = 10L;
-        String newName = "TestFaculty";
-        String newColor = "RandomColor";
-        Faculty testFaculty = getTestFaculty(id, newName, newColor);
+        Faculty testFaculty = getTestFaculty(10L, "TestFaculty", "RandomColor");
 
         JSONObject facultyObject = new JSONObject();
-        facultyObject.put("name", newName);
-        facultyObject.put("color", newColor);
+        facultyObject.put("name", testFaculty.getName());
+        facultyObject.put("color", testFaculty.getColor());
 
         when(facultyService.updateFaculty(any(Faculty.class))).thenReturn(testFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/faculty", id)
+                        .put("/faculty", testFaculty.getId())
                         .content(facultyObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(newName))
-                .andExpect(jsonPath("$.color").value(newColor));
+                .andExpect(jsonPath("$.id").value(testFaculty.getId()))
+                .andExpect(jsonPath("$.name").value(testFaculty.getName()))
+                .andExpect(jsonPath("$.color").value(testFaculty.getColor()));
     }
 
     @Test
     @DisplayName("Удаление добавленного факультета по id")
     void deleteFaculty() throws Exception {
-        long id = 10L;
-        String name = "TestFaculty";
-        String color = "RandomColor";
-        Faculty testFaculty = getTestFaculty(id, name, color);
+        Faculty testFaculty = getTestFaculty(10L, "TestFaculty", "RandomColor");
 
         doNothing().when(facultyService).deleteFaculty(testFaculty.getId());
 
@@ -149,23 +144,22 @@ class FacultyControllerWebMvcTest {
     @Test
     @DisplayName("Фильтрация факультетов по цвету")
     void filterColorFaculty() throws Exception {
-        long id = 10L;
-        String name = "TestFaculty";
-        String color = "RandomColor";
-        Faculty testFaculty = getTestFaculty(id, name, color);
-        String colorFilter = "Color";
+        Faculty testFaculty = getTestFaculty(10L, "TestFaculty", "TestColor");
+        String colorFilter = "TestColor";
 
         Collection<Faculty> facultyByColor = Collections.singletonList(testFaculty);
 
         when(facultyService.filterColor(colorFilter)).thenReturn(facultyByColor);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/filterAge", colorFilter)
+        mockMvc.perform(get("/faculty/filterColor")
+                        .param("color", colorFilter)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(id))
-                .andExpect(jsonPath("$[0].name").value(name))
-                .andExpect(jsonPath("$[0].color").value(color));
+                .andExpect(jsonPath("$.id").value(testFaculty.getId()))
+                .andExpect(jsonPath("$[0].name").value(testFaculty.getName()))
+                .andExpect(jsonPath("$[0].color").value(testFaculty.getColor()));
+
+        verify(facultyService, times(1)).filterColor(colorFilter);
     }
 
     @Test
@@ -180,26 +174,39 @@ class FacultyControllerWebMvcTest {
         Collection<Faculty> findByName = Collections.singletonList(testFaculty1);
         Collection<Faculty> findByColor = Collections.singletonList(testFaculty2);
 
-        when(facultyService.findByNameOrColor(findName)).thenReturn(findByName);
-        when(facultyService.findByNameOrColor(findColor)).thenReturn(findByColor);
+        when(facultyService.findByNameOrColor(anyString())).thenAnswer(invocation -> {
+            String param = invocation.getArgument(0, String.class);
+            if (param.equals(findName)) {
+                return findByName;
+            } else if (param.equals(findColor)) {
+                return findByColor;
+            }
+            return Collections.emptyList();
+        });
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/nameOrColor")
-                        .param("find", findName)
+        mockMvc.perform(get("/faculty/nameOrColor")
+                        .param("findParameter", findName) // Измените имя параметра
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(testFaculty1.getId()))
                 .andExpect(jsonPath("$[0].name").value("TestFaculty1"))
                 .andExpect(jsonPath("$[0].color").value("RandomColor1"));
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/nameOrColor")
-                        .param("find", findColor)
+        mockMvc.perform(get("/faculty/nameOrColor")
+                        .param("findParameter", findColor) // Измените имя параметра
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(12L))
+                .andExpect(jsonPath("$[0].id").value(testFaculty2.getId()))
                 .andExpect(jsonPath("$[0].name").value("TestFaculty2"))
                 .andExpect(jsonPath("$[0].color").value("RandomColor2"));
+
+        verify(facultyService, times(2)).findByNameOrColor(anyString()); // Метод вызывается 2 раза
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(facultyService, times(2)).findByNameOrColor(captor.capture());
+        List<String> allValues = captor.getAllValues();
+        assertEquals(findName, allValues.get(0));
+        assertEquals(findColor, allValues.get(1));
     }
 
     @Test
@@ -213,8 +220,7 @@ class FacultyControllerWebMvcTest {
 
         when(facultyService.getStudentsByFaculty(facultyId)).thenReturn(studentsByFaculty);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/getStudentsFaculty/{id}", facultyId)
+        mockMvc.perform(get("/faculty/getStudentsFaculty/{id}", facultyId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(11L))

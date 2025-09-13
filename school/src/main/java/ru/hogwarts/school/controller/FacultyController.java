@@ -64,6 +64,7 @@ public class FacultyController {
 
     @GetMapping("/filterColor")
     public ResponseEntity<Collection<Faculty>> filterColorFaculty (@RequestParam String color) {
+        System.out.println("color = " + color);
         if (color != null && color.isBlank()){
             return ResponseEntity.ok(facultyService.filterColor(color));
         }

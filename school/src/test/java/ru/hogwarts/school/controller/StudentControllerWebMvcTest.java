@@ -16,6 +16,8 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -38,14 +40,14 @@ class StudentControllerWebMvcTest {
     @MockitoBean
     private StudentService studentService;
 
-    Student getTestStudent(String name, int age) {
+    private Student getTestStudent(String name, int age) {
         Student test = new Student();
         test.setName(name);
         test.setAge(age);
         return test;
     }
 
-    Student getTestStudent(Long id, String name, int age) {
+    private Student getTestStudent(Long id, String name, int age) {
         Student test = new Student();
         test.setId(id);
         test.setName(name);
@@ -53,7 +55,7 @@ class StudentControllerWebMvcTest {
         return test;
     }
 
-    Faculty getTestFaculty(Long id, String name, String color) {
+    private Faculty getTestFaculty(Long id, String name, String color) {
         Faculty test = new Faculty();
         test.setId(id);
         test.setName(name);
@@ -64,13 +66,11 @@ class StudentControllerWebMvcTest {
     @Test
     @DisplayName("Добавление студента")
     void createStudent() throws Exception {
-        String name = "TestStudent";
-        int age = 20;
-        Student testStudent = getTestStudent(name, age);
+        Student testStudent = getTestStudent("TestStudent", 20);
 
         JSONObject studentObject = new JSONObject();
-        studentObject.put("name", name);
-        studentObject.put("color", age);
+        studentObject.put("name", testStudent.getName());
+        studentObject.put("age", testStudent.getAge());
 
         when(studentService.createStudent(any(Student.class))).thenReturn(testStudent);
 
@@ -80,17 +80,35 @@ class StudentControllerWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
+                .andExpect(jsonPath("$.name").value(testStudent.getName()))
+                .andExpect(jsonPath("$.age").value(testStudent.getAge()));
+    }
+
+    @Test
+    @DisplayName("Добавление студента - упрощенный вариант кода теста")
+    void createStudentBasic() throws Exception {
+        Student testStudent = getTestStudent("TestStudent", 20);
+
+        JSONObject studentObject = new JSONObject();
+        studentObject.put("name", testStudent.getName());
+        studentObject.put("age", testStudent.getAge());
+
+        when(studentService.createStudent(any(Student.class))).thenReturn(testStudent);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/student")
+                        .content(studentObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(testStudent.getName()))
+                .andExpect(jsonPath("$.age").value(testStudent.getAge()));
     }
 
     @Test
     @DisplayName("Просмотр добавленного студента по id")
     void getStudentId() throws Exception {
-        long id = 10L;
-        String name = "TestStudent";
-        int age = 20;
-        Student testStudent = getTestStudent(id, name, age);
+        Student testStudent = getTestStudent(10L, "TestStudent", 20);
 
         when(studentService.getStudentId(anyLong())).thenReturn(testStudent);
 
@@ -106,35 +124,29 @@ class StudentControllerWebMvcTest {
     @Test
     @DisplayName("Обновление данных добавленного студента")
     void updateStudent() throws Exception {
-        long id = 11L;
-        String newName = "NewTestStudent";
-        int newAge = 21;
-        Student testStudent = getTestStudent(id, newName, newAge);
+        Student testStudent = getTestStudent(11L, "NewTestStudent", 21);
 
         JSONObject studentObject = new JSONObject();
-        studentObject.put("name", newName);
-        studentObject.put("age", newAge);
+        studentObject.put("name", testStudent.getName());
+        studentObject.put("age", testStudent.getAge());
 
         when(studentService.updateStudent(any(Student.class))).thenReturn(testStudent);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/student", id)
+                        .put("/student", testStudent.getId())
                         .content(studentObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(newName))
-                .andExpect(jsonPath("$.age").value(newAge));
+                .andExpect(jsonPath("$.id").value(testStudent.getId()))
+                .andExpect(jsonPath("$.name").value(testStudent.getName()))
+                .andExpect(jsonPath("$.age").value(testStudent.getAge()));
     }
 
     @Test
     @DisplayName("Удаление добавленного студента по id")
     void deleteStudent() throws Exception {
-        long id = 10L;
-        String name = "TestStudent";
-        int age = 20;
-        Student testStudent = getTestStudent(id, name, age);
+        Student testStudent = getTestStudent(10L, "TestStudent", 20);
 
         doNothing().when(studentService).deleteStudent(testStudent.getId());
 
@@ -148,11 +160,8 @@ class StudentControllerWebMvcTest {
     @Test
     @DisplayName("Фильтрация студентов по возрасту")
     void filterAgeStudent() throws Exception {
+        Student testStudent = getTestStudent(15L, "TestStudent", 23);
         int ageFilter = 23;
-        long id = 15L;
-        String name = "TestStudent";
-        int age = 23;
-        Student testStudent = getTestStudent(id, name, age);
 
         Collection<Student> studentsByAge = Collections.singletonList(testStudent);
 
@@ -162,18 +171,15 @@ class StudentControllerWebMvcTest {
                         .get("/student/filterAge", ageFilter)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$[0].name").value(name))
-                .andExpect(jsonPath("$[0].age").value(age));
+                .andExpect(jsonPath("$[0].id").value(testStudent.getId()))
+                .andExpect(jsonPath("$[0].name").value(testStudent.getName()))
+                .andExpect(jsonPath("$[0].age").value(testStudent.getAge()));
     }
 
     @Test
     @DisplayName("Поиск студентов по возрасту в заданном диапазоне")
     void findByAgeBetween() throws Exception {
-        long id = 15L;
-        String name = "TestStudent";
-        int age = 23;
-        Student testStudent = getTestStudent(id, name, age);
+        Student testStudent = getTestStudent(15L, "TestStudent", 23);
         int minAge = 21;
         int maxAge = 25;
 
@@ -187,19 +193,16 @@ class StudentControllerWebMvcTest {
                         .param("ageMax", String.valueOf(maxAge))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(id))
-                .andExpect(jsonPath("$[0].name").value(name))
-                .andExpect(jsonPath("$[0].age").value(age));
+                .andExpect(jsonPath("$[0].id").value(testStudent.getId()))
+                .andExpect(jsonPath("$[0].name").value(testStudent.getName()))
+                .andExpect(jsonPath("$[0].age").value(testStudent.getAge()));
     }
 
     @Test
     @DisplayName("Вывод факультета заданного студента")
     void getFacultyByStudent() throws Exception {
+        Faculty testFaculty = getTestFaculty(5L, "Lion", "orange");
         long studentId = 5L;
-        long id = 5L;
-        String name = "Lion";
-        String color = "orange";
-        Faculty testFaculty = getTestFaculty(id, name, color);
 
         when(studentService.getFacultyByStudent(studentId)).thenReturn((Collection<Student>) testFaculty);
 
@@ -207,9 +210,9 @@ class StudentControllerWebMvcTest {
                         .get("/student/getFacultyStudent/{id}", studentId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.color").value(color));
+                .andExpect(jsonPath("$.id").value(testFaculty.getId()))
+                .andExpect(jsonPath("$.name").value(testFaculty.getName()))
+                .andExpect(jsonPath("$.color").value(testFaculty.getColor()));
     }
 
 }
