@@ -62,7 +62,7 @@ class StudentControllerRestTemplateTest {
     /**
      * Метод для формирования списка студентов
      */
-    List<Student> getStudentRepository() {
+    List<Student> addAndGetStudentList() {
         return Stream.generate(() -> studentRepository.save(new Student()))
                 .limit(nextInt(5, 10))
                 .toList();
@@ -77,15 +77,22 @@ class StudentControllerRestTemplateTest {
 
     Student getTestStudent(String name, int age) {
         Student test = new Student();
-        test.setId(0L);
         test.setName(name);
         test.setAge(age);
         return test;
     }
 
-    Student getTestStudentWithFaculty(String name, int age, Faculty faculty) {
+    Student getTestStudent(Long id, String name, int age) {
         Student test = new Student();
-        test.setId(0L);
+        test.setId(id);
+        test.setName(name);
+        test.setAge(age);
+        return test;
+    }
+
+    Student getTestStudentWithFaculty(Long id, String name, int age, Faculty faculty) {
+        Student test = new Student();
+        test.setId(id);
         test.setName(name);
         test.setAge(age);
         test.setFaculty(faculty);
@@ -95,36 +102,31 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Добавление студента")
     void createStudent() throws Exception {
-        List<Student> repository = getStudentRepository();
         Student expected = getTestStudent("TestStudent", 20);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/student"),
+                getURL(""),
                 HttpMethod.POST,
                 new HttpEntity<Student>(expected),
                 new ParameterizedTypeReference<Student>() {
                 }
         );
-        expected.setId(result.getBody().getId());
 
         assertThat(result).isNotNull();
-        assertThat(result.getBody()).isNotNull();
-        assertEquals(expected, result.getBody());
+        final Student actual = result.getBody();
+        assertThat(actual).isNotNull();
+        assertThat(actual.getId()).isNotNull();
+        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected);
     }
 
     @Test
     @DisplayName("Просмотр добавленного студента по id")
     void getStudentId() throws Exception {
-        List<Student> repository = getStudentRepository();
-        Student expected = getOneSomeStudents(repository);
+        List<Student> list = addAndGetStudentList();
+        Student expected = getOneSomeStudents(list);
+        String url = getURL("/") + expected.getId();
 
-        ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/student/{id}") + expected.getId(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Student>() {
-                }
-        );
+        ResponseEntity<Student> result = restTemplate.getForEntity(url, Student.class);
 
         assertThat(result).isNotNull();
         assertThat(result.getBody()).isNotNull();
@@ -134,7 +136,7 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Обновление данных добавленного студента")
     void updateStudent() throws Exception {
-        List<Student> repository = getStudentRepository();
+        List<Student> repository = addAndGetStudentList();
         Student actual = getOneSomeStudents(repository);
         Student expected = new Student();
         expected.setId(actual.getId());
@@ -159,11 +161,11 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Удаление добавленного студента по id")
     void deleteStudent() throws Exception {
-        List<Student> repository = getStudentRepository();
+        List<Student> repository = addAndGetStudentList();
         Student expected = getOneSomeStudents(repository);
 
         ResponseEntity<Student> result = restTemplate.exchange(
-                getURL("/student/{id}") + expected.getId(),
+                getURL("/") + expected.getId(),
                 HttpMethod.DELETE,
                 null,
                 new ParameterizedTypeReference<Student>() {
@@ -177,7 +179,7 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Фильтрация студентов по возрасту")
     void filterAgeStudent() throws Exception {
-        List<Student> repository = getStudentRepository();
+        List<Student> repository = addAndGetStudentList();
         int age = insecure().randomInt();
         Student test1 = getTestStudent("TestStudent1", age);
         Student test2 = getTestStudent("TestStudent2", age);
@@ -188,7 +190,7 @@ class StudentControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/student/filterAge" + age),
+                getURL("/filterAge" + age),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -206,7 +208,7 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Поиск студентов по возрасту в заданном диапазоне")
     void findByAgeBetween() throws Exception {
-        List<Student> repository = getStudentRepository();
+        List<Student> repository = addAndGetStudentList();
         int age = insecure().randomInt();
         Student test1 = getTestStudent("TestStudent1", insecure().randomInt(age - 1, age + 5));
         Student test2 = getTestStudent("TestStudent2", insecure().randomInt(age - 1, age + 5));
@@ -217,7 +219,7 @@ class StudentControllerRestTemplateTest {
         expected.add(test2);
 
         ResponseEntity<Collection<Student>> result = restTemplate.exchange(
-                getURL("/student/ageBetween" + "&min=" + (age - 1) + "&max=" + (age + 5)),
+                getURL("/ageBetween" + "&min=" + (age - 1) + "&max=" + (age + 5)),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -230,15 +232,13 @@ class StudentControllerRestTemplateTest {
     }
 
     @Test
-    @DisplayName("Поиск студентов по возрасту в заданном диапазоне")
+    @DisplayName("Вывод факультета заданного студента")
     void getFacultyByStudent() throws Exception {
-        List<Student> repository = getStudentRepository();
+        List<Student> list = addAndGetStudentList();
         Faculty testFaculty = new Faculty();
         facultyRepository.save(testFaculty);
-        Student test1 = getTestStudentWithFaculty("TestStudent1", 20, testFaculty);
-        Student test2 = getTestStudentWithFaculty("TestStudent2", 25, testFaculty);
-        studentRepository.save(test1);
-        studentRepository.save(test2);
+        Student test1 = studentRepository.save(getTestStudentWithFaculty(1L,"TestStudent1", 20, testFaculty));
+        Student test2 = studentRepository.save(getTestStudentWithFaculty(2L,"TestStudent2", 25, testFaculty));
         List<Student> expected = new ArrayList<>();
         expected.add(test1);
         expected.add(test2);
@@ -246,7 +246,7 @@ class StudentControllerRestTemplateTest {
         facultyRepository.save(testFaculty);
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/student/getFacultyStudent/{id}" + test1.getId()),
+                getURL("/getFacultyStudent/{id}" + test1.getId()),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Faculty>() {

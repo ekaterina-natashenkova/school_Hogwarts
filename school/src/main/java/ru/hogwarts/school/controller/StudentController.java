@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
@@ -32,7 +33,7 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {
         Student student1 = studentService.createStudent(student);
         return ResponseEntity.ok(student1);
@@ -65,7 +66,7 @@ public class StudentController {
     @GetMapping("/filterAge")
     public ResponseEntity<Collection<Student>> filterAgeStudent(@RequestParam int age) {
         if (age > 0){
-           return ResponseEntity.ok(studentService.filterAge(age));
+            return ResponseEntity.ok(studentService.filterAge(age));
         }
         return ResponseEntity.ok(Collections.emptyList());
     }
@@ -76,7 +77,7 @@ public class StudentController {
     }
 
     @GetMapping("/getFacultyStudent/{id}")
-    public ResponseEntity<Collection<Student>> getFacultyByStudent(@PathVariable Long id) {
+    public ResponseEntity<Faculty> getFacultyByStudent(@PathVariable Long id) {
         return ResponseEntity.ok(studentService.getFacultyByStudent(id));
     }
 
