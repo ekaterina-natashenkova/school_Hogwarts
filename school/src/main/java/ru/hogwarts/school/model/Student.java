@@ -17,7 +17,9 @@ import java.util.Objects;
 @Table(name = "Student")
 public class Student {
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    /**
+     * Для разового вызова ID - @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

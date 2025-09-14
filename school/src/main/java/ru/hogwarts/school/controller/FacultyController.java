@@ -34,11 +34,9 @@ public class FacultyController {
         this.facultyService = facultyService;
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
-        System.out.println("faculty = " + faculty);
         Faculty faculty1 = facultyService.createFaculty(faculty);
-        System.out.println("faculty1 = " + faculty1);
         return ResponseEntity.ok(faculty1);
     }
 
@@ -48,7 +46,6 @@ public class FacultyController {
         if (faculty == null) {
             return ResponseEntity.notFound().build();
         }
-        //System.out.println("faculty = " + faculty);
         return ResponseEntity.ok(faculty);
     }
 
@@ -69,7 +66,7 @@ public class FacultyController {
 
     @GetMapping("/filterColor")
     public ResponseEntity<Collection<Faculty>> filterColorFaculty (@RequestParam String color) {
-        if (color != null && color.isBlank()){
+        if (color != null && !color.isBlank()){
             return ResponseEntity.ok(facultyService.filterColor(color));
         }
         return ResponseEntity.ok(Collections.emptyList());
