@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.ArgumentCaptor.forClass;
 
 @WebMvcTest(FacultyController.class)
 class FacultyControllerWebMvcTest {
@@ -46,14 +44,14 @@ class FacultyControllerWebMvcTest {
     @MockitoBean
     private StudentService studentService;
 
-    Faculty getTestFaculty(String name, String color) {
+    private Faculty getTestFaculty(String name, String color) {
         Faculty test = new Faculty();
         test.setName(name);
         test.setColor(color);
         return test;
     }
 
-    Faculty getTestFaculty(Long id, String name, String color) {
+    private Faculty getTestFaculty(Long id, String name, String color) {
         Faculty test = new Faculty();
         test.setId(id);
         test.setName(name);
@@ -61,7 +59,7 @@ class FacultyControllerWebMvcTest {
         return test;
     }
 
-    Student getTestStudent(Long id, String name, int age) {
+    private Student getTestStudent(Long id, String name, int age) {
         Student test = new Student();
         test.setId(id);
         test.setName(name);
@@ -155,7 +153,7 @@ class FacultyControllerWebMvcTest {
                         .param("color", colorFilter)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testFaculty.getId()))
+                .andExpect(jsonPath("$[0].id").value(testFaculty.getId()))
                 .andExpect(jsonPath("$[0].name").value(testFaculty.getName()))
                 .andExpect(jsonPath("$[0].color").value(testFaculty.getColor()));
 

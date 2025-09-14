@@ -16,8 +16,6 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -168,7 +166,7 @@ class StudentControllerWebMvcTest {
         when(studentService.filterAge(ageFilter)).thenReturn(studentsByAge);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/filterAge", ageFilter)
+                        .get("/student/filterAge?age={age}", ageFilter)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(testStudent.getId()))
@@ -189,8 +187,8 @@ class StudentControllerWebMvcTest {
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/ageBetween")
-                        .param("ageMin", String.valueOf(minAge))
-                        .param("ageMax", String.valueOf(maxAge))
+                        .param("minAge", String.valueOf(minAge))
+                        .param("maxAge", String.valueOf(maxAge))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(testStudent.getId()))
@@ -204,7 +202,7 @@ class StudentControllerWebMvcTest {
         Faculty testFaculty = getTestFaculty(5L, "Lion", "orange");
         long studentId = 5L;
 
-        when(studentService.getFacultyByStudent(studentId)).thenReturn((Collection<Student>) testFaculty);
+        when(studentService.getFacultyByStudent(studentId)).thenReturn(testFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/getFacultyStudent/{id}", studentId)

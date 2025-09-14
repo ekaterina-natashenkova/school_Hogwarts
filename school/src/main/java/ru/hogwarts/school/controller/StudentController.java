@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
@@ -75,7 +76,7 @@ public class StudentController {
     }
 
     @GetMapping("/getFacultyStudent/{id}")
-    public ResponseEntity<Collection<Student>> getFacultyByStudent(@PathVariable Long id) {
+    public ResponseEntity<Faculty> getFacultyByStudent(@PathVariable Long id) {
         return ResponseEntity.ok(studentService.getFacultyByStudent(id));
     }
 
