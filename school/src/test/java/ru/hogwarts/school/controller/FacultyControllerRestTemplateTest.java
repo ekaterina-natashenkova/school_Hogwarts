@@ -12,15 +12,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -131,16 +132,14 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Обновление данных факультета")
     void updateFaculty() throws Exception{
-        List<Faculty> list = addAndGetFacultyList();
-        Faculty testFaculty = getOneSomeFaculty(list);
-
+        Faculty actual = facultyRepository.save(getTestFaculty("TestFaculty", "TestColor"));
         Faculty expected = new Faculty();
-        expected.setId(testFaculty.getId());
+        expected.setId(actual.getId());
         expected.setName("TestFaculty1");
         expected.setColor("TestColor1");
 
         ResponseEntity<Faculty> result = restTemplate.exchange(
-                getURL("/"),
+                getURL(""),
                 HttpMethod.PUT,
                 new HttpEntity<>(expected),
                 Faculty.class
@@ -151,11 +150,8 @@ class FacultyControllerRestTemplateTest {
         assertThat(result.getBody()).isNotNull();
         assertThat(result.getBody().getName()).isEqualTo("TestFaculty1");
         assertThat(result.getBody().getColor()).isEqualTo("TestColor1");
-
-        Optional<Faculty> updatedFaculty = facultyRepository.findById(testFaculty.getId());
-        assertThat(updatedFaculty).isPresent();
-        assertThat(updatedFaculty.get().getName()).isEqualTo("TestFaculty1");
-        assertThat(updatedFaculty.get().getColor()).isEqualTo("TestColor1");
+        assertTrue(facultyRepository.findAll().contains(expected));
+        assertFalse(facultyRepository.findAll().contains(actual));
     }
 
     @Test
@@ -179,58 +175,47 @@ class FacultyControllerRestTemplateTest {
     @Test
     @DisplayName("Фильтрация факультетов по цвету")
     void filterColorFaculty() throws Exception{
-        List<Faculty> repository = addAndGetFacultyList();
-        String color = "red";
-        Faculty test1 = getTestFaculty("TestFaculty1", color);
-        Faculty test2 = getTestFaculty("TestFaculty2", color);
-        facultyRepository.save(test1);
-        facultyRepository.save(test2);
-        List<Faculty> expected = new ArrayList<>();
-        expected.add(test1);
-        expected.add(test2);
+        String color = "TestColor";
+        Faculty test1 = facultyRepository.save(getTestFaculty("TestFaculty1", color));
+        Faculty test2 = facultyRepository.save(getTestFaculty("TestFaculty2", color));
+        List<Faculty> expected = Arrays.asList(test1, test2);
 
         ResponseEntity<Collection<Faculty>> result = restTemplate.exchange(
-                getURL("/filterColor" + color),
+                getURL("/filterColor?color=" + color),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Faculty>>() {
                 }
         );
 
-        assertEquals(HttpStatus.valueOf(200), result.getStatusCode());
-        assertThat(result).isNotNull();
-        assertThat(result.getBody())
-                .isNotNull()
-                .isNotEmpty()
-                .containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody()).hasSize(2);
+        assertThat(result.getBody()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
     @DisplayName("Поиск факультетов по названию или цвету")
     void findByNameOrColor() throws Exception{
-        List<Faculty> repository = addAndGetFacultyList();
-        String name = "TestFaculty";
-        String color = "TestColor";
-        Faculty expected1 = getTestFaculty(name, "TestColor");
-        Faculty expected2 = getTestFaculty("TestFaculty", color);
-        facultyRepository.save(expected1);
-        facultyRepository.save(expected2);
-        List<Faculty> expected = new ArrayList<>();
-        expected.add(expected1);
-        expected.add(expected2);
+        String findParameter = "Test";
+        Faculty expected1 = facultyRepository.save(getTestFaculty(findParameter, "TestColor"));
+        Faculty expected2 = facultyRepository.save(getTestFaculty("TestFaculty", findParameter));
+        List<Faculty> expected = Arrays.asList(expected1, expected2);
+        String url = UriComponentsBuilder.fromHttpUrl(getURL("/nameOrColor"))
+                .queryParam("findParameter", findParameter)
+                .toUriString();
 
         ResponseEntity<Collection<Faculty>> result = restTemplate.exchange(
-                getURL("/nameOrColor" + "?name=" + name.toUpperCase() + "?color=" + color.toUpperCase()),
+                url,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Faculty>>() {}
         );
 
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertThat(result).isNotNull();
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotNull();
-        assertEquals(expected.size(), result.getBody().size());
-        assertTrue(result.getBody().containsAll(expected));
+        assertThat(result.getBody()).hasSize(2);
+        assertThat(result.getBody()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
@@ -238,13 +223,9 @@ class FacultyControllerRestTemplateTest {
     void getStudentsByFaculty() throws Exception{
         List<Faculty> list = addAndGetFacultyList();
         Faculty testFaculty = getOneSomeFaculty(list);
-        Student test1 = getTestStudentWithFaculty("Dag", 22, testFaculty);
-        Student test2 = getTestStudentWithFaculty("Bony", 24, testFaculty);
-        studentRepository.save(test1);
-        studentRepository.save(test2);
-        List<Student> expected = new ArrayList<>();
-        expected.add(test1);
-        expected.add(test2);
+        Student test1 = studentRepository.save(getTestStudentWithFaculty("Dag", 22, testFaculty));
+        Student test2 = studentRepository.save(getTestStudentWithFaculty("Bony", 24, testFaculty));
+        List<Student> expected = Arrays.asList(test1, test2);
         testFaculty.setStudents(expected);
         facultyRepository.save(testFaculty);
 
