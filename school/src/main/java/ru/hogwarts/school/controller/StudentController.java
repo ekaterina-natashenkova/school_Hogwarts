@@ -80,4 +80,19 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getFacultyByStudent(id));
     }
 
+    @GetMapping("/getCountAllStudents")
+    public Integer getCountAllStudents() {
+        return studentService.getCountAllStudents();
+    }
+
+    @GetMapping("/getAverageAgeStudents")
+    public Double getAverageAgeStudents() {
+        return studentService.getAverageAgeStudents();
+    }
+
+    @GetMapping("/getLastFiveStudents")
+    public Collection<Student> getLastFiveStudents() {
+        return studentService.getLastFiveStudents();
+    }
+
 }
