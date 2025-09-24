@@ -24,10 +24,10 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "student_name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "student_age")
+    @Column(name = "age")
     private int age;
 
     @JsonIgnore

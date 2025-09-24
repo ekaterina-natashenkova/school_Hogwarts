@@ -23,10 +23,10 @@ public class Faculty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "faculty_name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "faculty_color")
+    @Column(name = "color")
     private String color;
 
     @OneToMany(mappedBy = "faculty")
