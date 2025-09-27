@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * ResponseEntity.notFound().build() - когда ресурс не был найден, поскольку это соответствует коду состояния HTTP 404 Not Found.
+ * ResponseEntity.notFound().build() - когда ресурс не был найден, поскольку это соответствует коду состояния HTTP 404 Not Found. <br/>
  * ResponseEntity.status(HttpStatus.BAD_REQUEST).build() - когда запрос от клиента был неверным или не соответствует требованиям сервера.
  */
 
@@ -79,6 +79,11 @@ public class FacultyController {
     @GetMapping("/getStudentsFaculty/{id}")
     public ResponseEntity<Collection<Student>> getStudentsByFaculty(@PathVariable Long id) {
         return ResponseEntity.ok(facultyService.getStudentsByFaculty(id));
+    }
+
+    @GetMapping("/longestFacultyName")
+    public String getLongestFacultyName() {
+        return facultyService.getLongestFacultyName();
     }
 
 }
