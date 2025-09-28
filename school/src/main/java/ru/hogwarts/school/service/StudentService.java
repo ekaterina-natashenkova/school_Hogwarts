@@ -8,6 +8,7 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -103,6 +104,49 @@ public class StudentService {
                 .mapToInt(Student::getAge)
                 .average()
                 .orElse(0.0);
+    }
+
+    /** Вывод в консоль (с использованием sout) имен всех студентов в параллельном режиме (не синхронизированный поток) - список из 6 имен: <br/>
+     * - первые два имени вывести в основном потоке <br/>
+     * - имена третьего и четвертого студента вывести в параллельном потоке <br/>
+     * - имена пятого и шестого студента вывести в еще одном параллельном потоке.
+     */
+    public void printParallelAllStudentNames() {
+        logger.info("Was invoked method for print all student names in parallel mode");
+        List<Student> students = studentRepository.findAll();
+        System.out.println(students.get(0).getName());
+        System.out.println(students.get(1).getName());
+        for (int i = 0; i < 2; i++) {
+            final int studentIndex = 2 + i * 2;
+            new Thread(() -> {
+                System.out.println(students.get(studentIndex).getName());
+                System.out.println(students.get(studentIndex + 1).getName());
+            }).start();
+        }
+    }
+
+    /** Вывод в консоль (с использованием sout) имен всех студентов в синхронном режиме - список из 6 имен: <br/>
+     * - первые два имени вывести в основном потоке <br/>
+     * - имена третьего и четвертого студента вывести в параллельном потоке <br/>
+     * - имена пятого и шестого студента вывести в еще одном параллельном потоке.
+     */
+    public void printSynchronizedAllStudentNames(){
+        logger.info("Was invoked method for print all student names in synchronized mode");
+        List<Student> students = studentRepository.findAll();
+        final Object lock = new Object();
+        synchronized (lock) {
+            System.out.println(students.get(0).getName());
+            System.out.println(students.get(1).getName());
+        }
+        for (int i = 0; i < 2; i++) {
+            final int studentIndex = 2 + i * 2;
+            new Thread(() -> {
+                synchronized (lock) {
+                    System.out.println(students.get(studentIndex).getName());
+                    System.out.println(students.get(studentIndex + 1).getName());
+                }
+            }).start();
+        }
     }
 
 }
