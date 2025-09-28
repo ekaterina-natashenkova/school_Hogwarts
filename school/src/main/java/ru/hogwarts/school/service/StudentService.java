@@ -3,7 +3,6 @@ package ru.hogwarts.school.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
@@ -82,6 +81,28 @@ public class StudentService {
         logger.info("Was invoked method for get last five students");
         logger.debug("Get last five students");
         return studentRepository.getLastFiveStudents();
+    }
+
+    public Collection<String> getStudentNamesStartingWithA() {
+        logger.info("Was invoked method for get student names starting with A with stream");
+        Collection<Student> students = studentRepository.findAll();
+        logger.debug("Get list student names starting with A");
+        return students.stream()
+                .map(Student::getName)
+                .filter(name -> name.startsWith("А"))
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public Double getAverageAgeAllStudents() {
+        logger.info("Was invoked method for get average age students with stream");
+        Collection<Student> students = studentRepository.findAll();
+        logger.debug("Get average age all students");
+        return students.stream()
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
     }
 
 }

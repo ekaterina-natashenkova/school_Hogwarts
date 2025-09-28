@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * ResponseEntity.notFound().build() - когда ресурс не был найден, поскольку это соответствует коду состояния HTTP 404 Not Found.
+ * ResponseEntity.notFound().build() - когда ресурс не был найден, поскольку это соответствует коду состояния HTTP 404 Not Found. <br/>
  * ResponseEntity.status(HttpStatus.BAD_REQUEST).build() - когда запрос от клиента был неверным или не соответствует требованиям сервера.
  */
 
@@ -93,6 +93,16 @@ public class StudentController {
     @GetMapping("/getLastFiveStudents")
     public Collection<Student> getLastFiveStudents() {
         return studentService.getLastFiveStudents();
+    }
+
+    @GetMapping("/namesStartingWithA")
+    public Collection<String> getStudentNamesStartingWithA() {
+        return studentService.getStudentNamesStartingWithA();
+    }
+
+    @GetMapping("/averageAgeAllStudents")
+    public Double getAverageAgeAllStudents() {
+        return studentService.getAverageAgeAllStudents();
     }
 
 }
